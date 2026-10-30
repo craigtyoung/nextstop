@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NextStop — What's your next move?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF4EA;
+    --cream-deep: #F2E9D8;
+    --ink: #2B261F;
+    --ink-soft: #5B5346;
+    --orange: #E35B2E;
+    --orange-deep: #C44A22;
+    --sky: #2F7A96;
+    --sky-soft: #BFE0EA;
+    --sage: #7C8B5E;
+    --sage-soft: #D9E2C6;
+    --paper-shadow: 0 18px 40px -16px rgba(43, 38, 31, 0.28);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* grain texture */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, .serif { font-family: 'Fraunces', serif; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 28px 0;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .logo-mark {
+    width: 30px; height: 30px; flex-shrink: 0;
+  }
+  nav .pill {
+    border: 1.5px solid var(--ink);
+    padding: 9px 20px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all .25s ease;
+  }
+  nav .pill:hover { background: var(--ink); color: var(--cream); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    padding: 70px 0 60px;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .hero-path {
+    position: absolute;
+    top: -40px; right: -60px;
+    width: 480px; height: 480px;
+    z-index: 0;
+    opacity: 0.9;
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--sage-soft);
+    color: #4B5636;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 7px 16px 7px 12px;
+    border-radius: 100px;
+    margin-bottom: 26px;
+    opacity: 0;
+    animation: rise 0.7s ease forwards;
+  }
+  .eyebrow .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--sage);
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 6.4vw, 92px);
+    line-height: 0.98;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    opacity: 0;
+    animation: rise 0.8s ease forwards;
+    animation-delay: 0.1s;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--orange);
+    font-weight: 500;
+  }
+
+  .hero p.lede {
+    margin-top: 26px;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 440px;
+    opacity: 0;
+    animation: rise 0.8s ease forwards;
+    animation-delay: 0.25s;
+  }
+
+  .cta-row {
+    margin-top: 38px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    opacity: 0;
+    animation: rise 0.8s ease forwards;
+    animation-delay: 0.4s;
+  }
+
+  .btn-main {
+    display: inline-block;
+    background: var(--orange);
+    color: var(--cream);
+    border: none;
+    padding: 17px 30px;
+    border-radius: 100px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -8px rgba(227, 91, 46, 0.55);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .btn-main:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -8px rgba(227, 91, 46, 0.65); }
+
+  .cta-sub { font-size: 14px; color: var(--ink-soft); }
+  .cta-sub strong { color: var(--ink); }
+
+  /* ---------- HERO CARD STACK ---------- */
+  .card-stack {
+    position: relative;
+    height: 520px;
+    opacity: 0;
+    animation: rise 0.9s ease forwards;
+    animation-delay: 0.5s;
+  }
+
+  .move-card {
+    position: absolute;
+    width: 300px;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: var(--paper-shadow);
+    padding: 22px;
+    border: 1px solid rgba(43,38,31,0.06);
+  }
+
+  .move-card.card-a {
+    top: 10px; left: 30px;
+    transform: rotate(-7deg);
+    z-index: 2;
+  }
+  .move-card.card-b {
+    top: 150px; left: 150px;
+    transform: rotate(4deg);
+    z-index: 3;
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .move-card.card-c {
+    top: 300px; left: 10px;
+    transform: rotate(-3deg);
+    z-index: 1;
+    opacity: 0.85;
+  }
+
+  .move-card .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+  }
+  .card-a .tag { background: var(--sky-soft); color: var(--sky); }
+  .card-b .tag { background: rgba(250,244,234,0.15); color: var(--cream); }
+  .card-c .tag { background: var(--sage-soft); color: #4B5636; }
+
+  .move-card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 21px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .move-card p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .card-b p { color: rgba(250,244,234,0.72); }
+
+  .move-card .meta {
+    margin-top: 16px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; color: var(--orange);
+  }
+  .card-b .meta { color: #F4A672; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- STRIP ---------- */
+  .strip {
+    border-top: 1.5px solid rgba(43,38,31,0.12);
+    border-bottom: 1.5px solid rgba(43,38,31,0.12);
+    padding: 22px 0;
+    overflow: hidden;
+  }
+  .strip-track {
+    display: flex;
+    gap: 60px;
+    white-space: nowrap;
+    animation: scroll 22s linear infinite;
+    width: max-content;
+  }
+  .strip-track span {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--ink-soft);
+    display: flex; align-items: center; gap: 60px;
+  }
+  .strip-track span::after { content: "✦"; color: var(--orange); font-style: normal; margin-left: 60px; }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---------- HOW ---------- */
+  .how {
+    padding: 120px 0 100px;
+  }
+  .section-head {
+    max-width: 620px;
+    margin-bottom: 70px;
+  }
+  .section-head .eyebrow { background: var(--sky-soft); color: var(--sky); }
+  .section-head .eyebrow .dot { background: var(--sky); }
+  .section-head h2 {
+    font-size: clamp(34px, 4vw, 52px);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-top: 18px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .step {
+    background: #fff;
+    border-radius: 24px;
+    padding: 36px 30px;
+    position: relative;
+    border: 1px solid rgba(43,38,31,0.07);
+    transition: transform .3s ease;
+  }
+  .step:hover { transform: translateY(-6px); }
+  .step .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 54px;
+    color: var(--cream-deep);
+    -webkit-text-stroke: 1.5px var(--orange);
+    color: transparent;
+    line-height: 1;
+    margin-bottom: 20px;
+    display: block;
+  }
+  .step:nth-child(2) .num { -webkit-text-stroke-color: var(--sky); }
+  .step:nth-child(3) .num { -webkit-text-stroke-color: var(--sage); }
+  .step h3 {
+    font-size: 23px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .step p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* ---------- SCENE (scenario) ---------- */
+  .scene {
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 36px;
+    margin: 0 32px 120px;
+    padding: 90px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scene::before {
+    content: "";
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(227,91,46,0.35), transparent 70%);
+    top: -250px; right: -150px;
+  }
+  .scene::after {
+    content: "";
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(47,122,150,0.35), transparent 70%);
+    bottom: -200px; left: -100px;
+  }
+  .scene-inner { position: relative; z-index: 2; max-width: 680px; }
+  .scene .eyebrow { background: rgba(250,244,234,0.12); color: var(--cream); }
+  .scene .eyebrow .dot { background: var(--orange); }
+  .scene h2 {
+    font-size: clamp(30px, 3.6vw, 44px);
+    font-weight: 500;
+    line-height: 1.25;
+    margin-top: 20px;
+  }
+  .scene h2 em { color: #F4A672; font-style: italic; }
+  .scene p {
+    margin-top: 22px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: rgba(250,244,234,0.68);
+    max-width: 560px;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta-final {
+    text-align: center;
+    padding: 0 0 140px;
+  }
+  .cta-final h2 {
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    max-width: 700px;
+    margin: 0 auto 36px;
+    line-height: 1.1;
+  }
+  .cta-final h2 em { color: var(--orange); font-style: italic; }
+
+  footer {
+    border-top: 1.5px solid rgba(43,38,31,0.12);
+    padding: 36px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  footer .logo { font-size: 17px; }
+
+  /* ---------- PHONE MOCKUP ---------- */
+  .phone-section { padding: 10px 0 120px; }
+  .phone-stage {
+    display: flex;
+    justify-content: center;
+    padding: 30px 0 10px;
+    position: relative;
+  }
+  .phone-stage::before {
+    content: "";
+    position: absolute;
+    width: 520px; height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--sky-soft), transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.6;
+    z-index: 0;
+  }
+  .phone-frame {
+    position: relative;
+    z-index: 1;
+    width: 300px;
+    height: 612px;
+    background: var(--ink);
+    border-radius: 46px;
+    padding: 14px;
+    box-shadow: 0 40px 70px -24px rgba(43,38,31,0.45), 0 0 0 2px rgba(43,38,31,0.06);
+  }
+  .phone-notch {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 26px;
+    background: var(--ink);
+    border-radius: 0 0 18px 18px;
+    z-index: 5;
+  }
+  .phone-screen {
+    position: relative;
+    width: 100%; height: 100%;
+    background: var(--cream);
+    border-radius: 34px;
+    overflow: hidden;
+    padding: 44px 20px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .app-status {
+    display: flex; justify-content: space-between;
+    font-size: 12px; font-weight: 600; color: var(--ink-soft);
+    margin-bottom: 30px;
+  }
+  .app-location { color: var(--sky); }
+  .app-eyebrow {
+    display: inline-block;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .app-greeting h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 30px; font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+  .app-moods { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+  .mood {
+    font-size: 13px; font-weight: 600;
+    padding: 8px 15px; border-radius: 100px;
+    background: #fff; border: 1px solid rgba(43,38,31,0.1);
+    color: var(--ink-soft);
+  }
+  .mood.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+  .app-card {
+    background: #fff; border-radius: 20px; padding: 18px;
+    box-shadow: 0 10px 24px -14px rgba(43,38,31,0.3);
+    margin-bottom: 14px;
+  }
+  .app-tag {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: #4B5636; background: var(--sage-soft);
+    padding: 4px 11px; border-radius: 100px;
+  }
+  .app-card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 19px; font-weight: 500;
+    margin: 10px 0 6px;
+  }
+  .app-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+  .app-cta { margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--orange); }
+  .app-card.ghost { opacity: 0.5; padding: 14px 18px; margin-bottom: 0; }
+  .app-card.ghost h4 { font-size: 16px; margin-top: 6px; }
+  .phone-home {
+    position: absolute; bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 5px; border-radius: 4px;
+    background: rgba(250,244,234,0.5);
+  }
+  .phone-caption {
+    text-align: center;
+    margin-top: 26px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 880px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-path { width: 320px; height: 320px; top: -60px; right: -80px; opacity: 0.6; }
+    .card-stack { height: 420px; margin-top: 20px; }
+    .move-card { width: 240px; }
+    .move-card.card-c { display: none; }
+    .steps { grid-template-columns: 1fr; }
+    .scene { margin: 0 16px 100px; padding: 50px 30px; }
+    .wrap { padding: 0 20px; }
+  }
+
+  @media (max-width: 480px) {
+    nav { padding: 20px 0; }
+    .logo { font-size: 19px; }
+    nav .pill { padding: 7px 15px; font-size: 13px; }
+    .hero { padding: 40px 0 30px; gap: 20px; }
+    .hero-path { display: none; }
+    .cta-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .move-card { width: 210px; padding: 18px; }
+    .move-card.card-a { left: 6px; }
+    .move-card.card-b { left: 90px; top: 130px; }
+    .card-stack { height: 360px; }
+    .phone-frame { width: 260px; height: 530px; }
+    .phone-notch { width: 100px; }
+    .app-greeting h3 { font-size: 26px; }
+    .scene { padding: 40px 22px; border-radius: 26px; }
+    footer { flex-direction: column; gap: 10px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="#2B261F" stroke-width="1.5"/>
+        <path d="M16 6 L19 15 L16 26 L13 15 Z" fill="#E35B2E"/>
+        <circle cx="16" cy="16" r="2" fill="#2B261F"/>
+      </svg>
+      NextStop
+    </div>
+    <a class="pill" href="#how">How it works</a>
+  </nav>
+
+  <section class="hero">
+    <svg class="hero-path" viewBox="0 0 480 480" fill="none">
+      <path d="M40 420 Q 140 380 150 280 Q 160 180 260 170 Q 360 160 380 60" stroke="#2F7A96" stroke-width="2.5" stroke-dasharray="1 14" stroke-linecap="round"/>
+      <circle cx="40" cy="420" r="6" fill="#7C8B5E"/>
+      <circle cx="380" cy="60" r="6" fill="#E35B2E"/>
+    </svg>
+
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Your AI travel companion</div>
+      <h1>What's your<br><em>next move?</em></h1>
+      <p class="lede">You land somewhere new. You've got three free hours before your flight. NextStop knows where you are and tells you exactly what to do with the time — no planning, no typing, no tabs.</p>
+      <div class="cta-row">
+        <a class="btn-main" href="demo.html">Try the live demo</a>
+        <div class="cta-sub">Built for people who<br><strong>go with the flow.</strong></div>
+      </div>
+    </div>
+
+    <div class="card-stack">
+      <div class="move-card card-a">
+        <span class="tag">4h to boarding</span>
+        <h4>Rooftop lounge, 8 min walk</h4>
+        <p>Quiet, good coffee, lounge access included with your card.</p>
+        <div class="meta">→ Get directions</div>
+      </div>
+      <div class="move-card card-b">
+        <span class="tag">Free afternoon</span>
+        <h4>The old quarter market</h4>
+        <p>Locals go here, not the guidebook spot. 20 min on foot.</p>
+        <div class="meta">→ Get directions</div>
+      </div>
+      <div class="move-card card-c">
+        <span class="tag">Golden hour</span>
+        <h4>Harbor viewpoint</h4>
+        <p>Best light of the day starts in 40 minutes.</p>
+        <div class="meta">→ Get directions</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="strip">
+  <div class="strip-track">
+    <span>NEW CITY</span><span>FREE AFTERNOON</span><span>LAYOVER</span><span>NO PLAN</span><span>GOLDEN HOUR</span><span>NEW CITY</span><span>FREE AFTERNOON</span><span>LAYOVER</span><span>NO PLAN</span><span>GOLDEN HOUR</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="how" id="how">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> How it works</div>
+      <h2>Three taps between you and the next good thing.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="num">01</span>
+        <h3>Open, wherever you are</h3>
+        <p>NextStop already knows your location and how much time you've got — nothing to explain, nothing to type.</p>
+      </div>
+      <div class="step">
+        <span class="num">02</span>
+        <h3>Tell it the mood</h3>
+        <p>Relax, explore, eat, move — one tap sets the direction. No forms, no itinerary to build.</p>
+      </div>
+      <div class="step">
+        <span class="num">03</span>
+        <h3>Get your next move</h3>
+        <p>One clear suggestion, not twenty options. Tap it, get directions, go.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="phone-section">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> In your pocket</div>
+      <h2>The whole point is that it fits in one hand.</h2>
+    </div>
+    <div class="phone-stage">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="app-status">
+            <span>9:41</span>
+            <span class="app-location">📍 Lisbon, Portugal</span>
+          </div>
+          <div class="app-greeting">
+            <span class="app-eyebrow">3h 20m until check-in</span>
+            <h3>What's your<br>next move?</h3>
+          </div>
+          <div class="app-moods">
+            <span class="mood active">Explore</span>
+            <span class="mood">Relax</span>
+            <span class="mood">Eat</span>
+            <span class="mood">Move</span>
+          </div>
+          <div class="app-card">
+            <span class="app-tag">8 min walk</span>
+            <h4>Miradouro da Graça</h4>
+            <p>Quiet viewpoint, locals' spot, best light right now.</p>
+            <div class="app-cta">Get directions →</div>
+          </div>
+          <div class="app-card ghost">
+            <span class="app-tag">15 min walk</span>
+            <h4>Feira da Ladra market</h4>
+          </div>
+        </div>
+        <div class="phone-home"></div>
+      </div>
+    </div>
+    <p class="phone-caption">One screen. One suggestion. No scrolling through options.</p>
+  </section>
+
+  <section class="scene">
+    <div class="scene-inner">
+      <div class="eyebrow"><span class="dot"></span> The moment this is built for</div>
+      <h2>"I had <em>four hours</em> before my flight, so I asked — and it sent me to a night market two streets over I'd never have found on my own."</h2>
+      <p>That's the whole idea. Not another itinerary app for planning months ahead — a companion for the in-between moments, when you're already there and just need to know what's next.</p>
+    </div>
+  </section>
+
+  <section class="cta-final">
+    <h2>Your next trip already has<br><em>a thousand good moments</em> in it.</h2>
+    <button class="btn-main">Join the first group in</button>
+  </section>
+
+  <footer>
+    <div class="logo">NextStop</div>
+    <div>A prototype — built in an afternoon, going somewhere real.</div>
+  </footer>
+</div>
+
+</body>
+</html>

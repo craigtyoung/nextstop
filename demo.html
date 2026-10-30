@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NextStop — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF4EA;
+    --ink: #2B261F;
+    --ink-soft: #5B5346;
+    --orange: #E35B2E;
+    --sky: #2F7A96;
+    --sky-soft: #BFE0EA;
+    --sage: #7C8B5E;
+    --sage-soft: #D9E2C6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--sky-soft);
+    background: radial-gradient(circle at 30% 20%, #D7ECE9, var(--sky-soft) 60%);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .back {
+    position: fixed;
+    top: 24px; left: 28px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.7);
+    padding: 9px 16px;
+    border-radius: 100px;
+    backdrop-filter: blur(6px);
+  }
+  .demo-label {
+    text-align: center;
+    margin-bottom: 26px;
+  }
+  .demo-label .eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 8px;
+  }
+  .demo-label h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 26px;
+  }
+  .demo-label p { font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
+
+  .phone-frame {
+    position: relative;
+    width: 320px;
+    height: 650px;
+    background: var(--ink);
+    border-radius: 48px;
+    padding: 14px;
+    box-shadow: 0 50px 80px -24px rgba(43,38,31,0.5), 0 0 0 2px rgba(43,38,31,0.06);
+  }
+  .phone-notch {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    width: 128px; height: 28px;
+    background: var(--ink);
+    border-radius: 0 0 18px 18px;
+    z-index: 5;
+  }
+  .phone-screen {
+    position: relative;
+    width: 100%; height: 100%;
+    background: var(--cream);
+    border-radius: 36px;
+    overflow: hidden;
+    padding: 46px 22px 26px;
+    display: flex;
+    flex-direction: column;
+  }
+  .app-status { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 28px; }
+  .app-location { color: var(--sky); }
+  .app-eyebrow {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--orange);
+    margin-bottom: 8px;
+    transition: opacity 0.2s ease;
+  }
+  .app-greeting h3 {
+    font-family: 'Fraunces', serif; font-size: 30px; font-weight: 500; line-height: 1.1;
+    margin-bottom: 24px;
+  }
+  .app-moods { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+  .mood {
+    font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 100px;
+    background: #fff; border: 1.5px solid rgba(43,38,31,0.1); color: var(--ink-soft);
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .mood:hover { border-color: var(--orange); }
+  .mood.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+  .app-card {
+    background: #fff; border-radius: 20px; padding: 20px;
+    box-shadow: 0 10px 24px -14px rgba(43,38,31,0.3);
+    margin-bottom: 14px;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .app-card.swap { opacity: 0; transform: translateY(8px); }
+  .app-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: #4B5636; background: var(--sage-soft); padding: 4px 11px; border-radius: 100px;
+  }
+  .app-card h4 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; margin: 11px 0 6px; }
+  .app-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+  .app-cta {
+    margin-top: 13px; font-size: 13px; font-weight: 600; color: var(--orange);
+    cursor: pointer; display: inline-block;
+  }
+  .app-card.ghost { opacity: 0.5; padding: 15px 20px; margin-bottom: 0; }
+  .app-card.ghost h4 { font-size: 16px; margin-top: 6px; }
+
+  .toast {
+    position: fixed;
+    bottom: 36px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--cream);
+    padding: 13px 22px; border-radius: 100px;
+    font-size: 14px; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .phone-home {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    width: 128px; height: 5px; border-radius: 4px; background: rgba(250,244,234,0.5);
+  }
+
+  /* On an actual phone, go full-bleed, drop the bezel */
+  @media (max-width: 440px) {
+    body { padding: 0; }
+    .back { background: rgba(255,255,255,0.85); }
+    .demo-label { display: none; }
+    .phone-frame {
+      width: 100vw; height: 100dvh;
+      border-radius: 0; padding: 0; box-shadow: none;
+    }
+    .phone-notch { display: none; }
+    .phone-screen { border-radius: 0; padding: 30px 22px 24px; }
+    .phone-home { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back" href="index.html">← NextStop</a>
+
+<div class="demo-label">
+  <div class="eyebrow">Live demo</div>
+  <h1>Tap a mood. See it work.</h1>
+  <p>This is the actual screen — not a screenshot.</p>
+</div>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-screen">
+    <div class="app-status">
+      <span>9:41</span>
+      <span class="app-location">📍 Lisbon, Portugal</span>
+    </div>
+    <div class="app-greeting">
+      <span class="app-eyebrow" id="countdown">3h 20m until check-in</span>
+      <h3>What's your<br>next move?</h3>
+    </div>
+    <div class="app-moods" id="moods">
+      <span class="mood active" data-mood="explore">Explore</span>
+      <span class="mood" data-mood="relax">Relax</span>
+      <span class="mood" data-mood="eat">Eat</span>
+      <span class="mood" data-mood="move">Move</span>
+    </div>
+    <div id="cardZone">
+      <div class="app-card" id="mainCard">
+        <span class="app-tag" id="mainTag">8 min walk</span>
+        <h4 id="mainTitle">Miradouro da Graça</h4>
+        <p id="mainDesc">Quiet viewpoint, locals' spot, best light right now.</p>
+        <div class="app-cta" id="directionsBtn">Get directions →</div>
+      </div>
+      <div class="app-card ghost" id="ghostCard">
+        <span class="app-tag" id="ghostTag">15 min walk</span>
+        <h4 id="ghostTitle">Feira da Ladra market</h4>
+      </div>
+    </div>
+  </div>
+  <div class="phone-home"></div>
+</div>
+
+<div class="toast" id="toast">Opening Maps…</div>
+
+<script>
+  const data = {
+    explore: {
+      main: { tag: "8 min walk", title: "Miradouro da Graça", desc: "Quiet viewpoint, locals' spot, best light right now." },
+      ghost: { tag: "15 min walk", title: "Feira da Ladra market" }
+    },
+    relax: {
+      main: { tag: "6 min walk", title: "Jardim do Príncipe Real", desc: "Shaded benches under an old cedar — the calmest spot in the neighborhood." },
+      ghost: { tag: "12 min walk", title: "Rooftop café, Bairro Alto" }
+    },
+    eat: {
+      main: { tag: "5 min walk", title: "Manteigaria", desc: "Fresh pastel de nata, straight out of the oven, no line this hour." },
+      ghost: { tag: "18 min walk", title: "Time Out Market" }
+    },
+    move: {
+      main: { tag: "3 min to the stop", title: "Tram 28 down to the river", desc: "The classic yellow tram — grab a window seat, ride it to the end." },
+      ghost: { tag: "10 min walk", title: "Walk the river promenade" }
+    }
+  };
+
+  const moods = document.querySelectorAll('.mood');
+  const mainCard = document.getElementById('mainCard');
+  const toast = document.getElementById('toast');
+
+  moods.forEach(m => {
+    m.addEventListener('click', () => {
+      moods.forEach(x => x.classList.remove('active'));
+      m.classList.add('active');
+
+      const set = data[m.dataset.mood];
+      mainCard.classList.add('swap');
+
+      setTimeout(() => {
+        document.getElementById('mainTag').textContent = set.main.tag;
+        document.getElementById('mainTitle').textContent = set.main.title;
+        document.getElementById('mainDesc').textContent = set.main.desc;
+        document.getElementById('ghostTag').textContent = set.ghost.tag;
+        document.getElementById('ghostTitle').textContent = set.ghost.title;
+        mainCard.classList.remove('swap');
+      }, 180);
+    });
+  });
+
+  document.getElementById('directionsBtn').addEventListener('click', () => {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1600);
+  });
+</script>
+
+</body>
+</html>
