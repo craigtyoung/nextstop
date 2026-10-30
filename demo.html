@@ -129,6 +129,49 @@
   .app-card.ghost { opacity: 0.5; padding: 15px 20px; margin-bottom: 0; }
   .app-card.ghost h4 { font-size: 16px; margin-top: 6px; }
 
+  .swipe-hint {
+    font-size: 11.5px; font-weight: 600; color: var(--ink-soft);
+    opacity: 0.6; margin-bottom: 10px;
+  }
+  .card-row {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    transition: opacity 0.15s ease;
+    padding-bottom: 8px;
+    margin: 0 -22px;
+    padding-left: 22px;
+    padding-right: 22px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .card-row::-webkit-scrollbar { display: none; }
+  .card-row .app-card {
+    flex: 0 0 auto;
+    width: 210px;
+    scroll-snap-align: start;
+    margin-bottom: 0;
+    cursor: default;
+  }
+  .card-row .app-card:first-child { border: 1.5px solid var(--orange); }
+
+  .phone-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(43,38,31,0.08);
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10.5px; font-weight: 600; color: var(--ink-soft);
+    cursor: pointer; opacity: 0.55; transition: opacity 0.2s ease, color 0.2s ease;
+  }
+  .nav-item .nav-icon { font-size: 19px; line-height: 1; }
+  .nav-item.active { opacity: 1; color: var(--orange); }
+
   .toast {
     position: fixed;
     bottom: 36px; left: 50%;
@@ -189,17 +232,14 @@
       <span class="mood" data-mood="eat">Eat</span>
       <span class="mood" data-mood="move">Move</span>
     </div>
-    <div id="cardZone">
-      <div class="app-card" id="mainCard">
-        <span class="app-tag" id="mainTag">8 min walk</span>
-        <h4 id="mainTitle">Miradouro da Graça</h4>
-        <p id="mainDesc">Quiet viewpoint, locals' spot, best light right now.</p>
-        <div class="app-cta" id="directionsBtn">Get directions →</div>
-      </div>
-      <div class="app-card ghost" id="ghostCard">
-        <span class="app-tag" id="ghostTag">15 min walk</span>
-        <h4 id="ghostTitle">Feira da Ladra market</h4>
-      </div>
+    <div class="swipe-hint">Swipe for more →</div>
+    <div class="card-row" id="cardRow"></div>
+
+    <div class="phone-nav">
+      <div class="nav-item active" data-nav="next"><span class="nav-icon">🧭</span>Next Move</div>
+      <div class="nav-item" data-nav="trip"><span class="nav-icon">✈️</span>Trip</div>
+      <div class="nav-item" data-nav="saved"><span class="nav-icon">🔖</span>Saved</div>
+      <div class="nav-item" data-nav="profile"><span class="nav-icon">👤</span>Profile</div>
     </div>
   </div>
   <div class="phone-home"></div>
@@ -209,51 +249,72 @@
 
 <script>
   const data = {
-    explore: {
-      main: { tag: "8 min walk", title: "Miradouro da Graça", desc: "Quiet viewpoint, locals' spot, best light right now." },
-      ghost: { tag: "15 min walk", title: "Feira da Ladra market" }
-    },
-    relax: {
-      main: { tag: "6 min walk", title: "Jardim do Príncipe Real", desc: "Shaded benches under an old cedar — the calmest spot in the neighborhood." },
-      ghost: { tag: "12 min walk", title: "Rooftop café, Bairro Alto" }
-    },
-    eat: {
-      main: { tag: "5 min walk", title: "Manteigaria", desc: "Fresh pastel de nata, straight out of the oven, no line this hour." },
-      ghost: { tag: "18 min walk", title: "Time Out Market" }
-    },
-    move: {
-      main: { tag: "3 min to the stop", title: "Tram 28 down to the river", desc: "The classic yellow tram — grab a window seat, ride it to the end." },
-      ghost: { tag: "10 min walk", title: "Walk the river promenade" }
-    }
+    explore: [
+      { tag: "8 min walk", title: "Miradouro da Graça", desc: "Quiet viewpoint, locals' spot, best light right now." },
+      { tag: "15 min walk", title: "Feira da Ladra market", desc: "Sunday flea market — vintage finds and street food." },
+      { tag: "5 min walk", title: "Alfama backstreets", desc: "Get lost on purpose. Tiled facades, fado drifting from doorways." }
+    ],
+    relax: [
+      { tag: "6 min walk", title: "Jardim do Príncipe Real", desc: "Shaded benches under an old cedar — the calmest spot in the neighborhood." },
+      { tag: "12 min walk", title: "Rooftop café, Bairro Alto", desc: "River views, slow coffee, no rush." },
+      { tag: "20 min walk", title: "Thermal bath house", desc: "Honestly the best place to just stop moving for an hour." }
+    ],
+    eat: [
+      { tag: "5 min walk", title: "Manteigaria", desc: "Fresh pastel de nata, straight out of the oven, no line this hour." },
+      { tag: "18 min walk", title: "Time Out Market", desc: "Dozens of stalls under one roof — pick anything." },
+      { tag: "14 min walk", title: "Cervejaria Ramiro", desc: "Seafood institution. Go hungry." }
+    ],
+    move: [
+      { tag: "3 min to the stop", title: "Tram 28 down to the river", desc: "The classic yellow tram — grab a window seat, ride it to the end." },
+      { tag: "10 min walk", title: "Walk the river promenade", desc: "Flat, scenic, easy pace." },
+      { tag: "7 min walk", title: "Miradouro stair climb", desc: "Short, steep, worth it for the view at the top." }
+    ]
   };
 
   const moods = document.querySelectorAll('.mood');
-  const mainCard = document.getElementById('mainCard');
+  const cardRow = document.getElementById('cardRow');
   const toast = document.getElementById('toast');
+
+  function renderCards(moodKey) {
+    cardRow.innerHTML = '';
+    data[moodKey].forEach(place => {
+      const card = document.createElement('div');
+      card.className = 'app-card';
+      card.innerHTML = `
+        <span class="app-tag">${place.tag}</span>
+        <h4>${place.title}</h4>
+        <p>${place.desc}</p>
+        <div class="app-cta">Get directions →</div>
+      `;
+      card.querySelector('.app-cta').addEventListener('click', () => {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1600);
+      });
+      cardRow.appendChild(card);
+    });
+  }
 
   moods.forEach(m => {
     m.addEventListener('click', () => {
       moods.forEach(x => x.classList.remove('active'));
       m.classList.add('active');
-
-      const set = data[m.dataset.mood];
-      mainCard.classList.add('swap');
-
+      cardRow.style.opacity = 0;
       setTimeout(() => {
-        document.getElementById('mainTag').textContent = set.main.tag;
-        document.getElementById('mainTitle').textContent = set.main.title;
-        document.getElementById('mainDesc').textContent = set.main.desc;
-        document.getElementById('ghostTag').textContent = set.ghost.tag;
-        document.getElementById('ghostTitle').textContent = set.ghost.title;
-        mainCard.classList.remove('swap');
-      }, 180);
+        renderCards(m.dataset.mood);
+        cardRow.style.opacity = 1;
+      }, 150);
     });
   });
 
-  document.getElementById('directionsBtn').addEventListener('click', () => {
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 1600);
+  // Bottom nav is a visual preview only — not wired to real screens yet
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+      item.classList.add('active');
+    });
   });
+
+  renderCards('explore');
 </script>
 
 </body>
